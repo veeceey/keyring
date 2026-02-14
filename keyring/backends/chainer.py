@@ -59,18 +59,14 @@ class ChainerBackend(backend.KeyringBackend):
                 pass
 
     def delete_password(self, service, username):
-        errors = []
         for keyring in self.backends:
             try:
                 return keyring.delete_password(service, username)
             except NotImplementedError:
                 pass
-            except PasswordDeleteError as e:
-                errors.append(e)
-        
-        # If we tried all backends and none succeeded, raise the last error
-        if errors:
-            raise errors[-1]
+            except PasswordDeleteError:
+                if keyring == self.backends[-1]:
+                    raise
 
     def get_credential(self, service, username):
         for keyring in self.backends:
