@@ -106,12 +106,10 @@ class TestWinVaultCaseInsensitive:
     """
 
     def _make_credential(self, username, password):
-        return keyring.backends.Windows.DecodingCredential(
-            {
-                'UserName': username,
-                'CredentialBlob': password.encode('utf-16'),
-            }
-        )
+        return keyring.backends.Windows.DecodingCredential({
+            'UserName': username,
+            'CredentialBlob': password.encode('utf-16'),
+        })
 
     def _make_keyring(self):
         kr = keyring.backends.Windows.WinVaultKeyring.__new__(
