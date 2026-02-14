@@ -36,6 +36,7 @@ def delete_test_keyrings(monkeypatch):
     """
     Fixture that creates backends where passwords exist in lower priority backend.
     """
+
     class HighPriorityKeyring(backend.KeyringBackend):
         priority = 2
         storage = {}
@@ -72,7 +73,7 @@ def delete_test_keyrings(monkeypatch):
 
     high = HighPriorityKeyring()
     low = LowPriorityKeyring()
-    
+
     monkeypatch.setattr('keyring.backend.get_all_keyring', lambda: [high, low])
     return high, low
 
@@ -100,17 +101,17 @@ class TestChainer:
         """
         high, low = delete_test_keyrings
         chainer = keyring.backends.chainer.ChainerBackend()
-        
+
         # Verify the password exists in the low priority backend
         assert low.get_password('test', 'user') == 'old-password'
         # Verify it doesn't exist in high priority backend
         assert high.get_password('test', 'user') is None
         # Verify chainer can retrieve it
         assert chainer.get_password('test', 'user') == 'old-password'
-        
+
         # Now delete it via chainer - should succeed even though high priority backend fails
         chainer.delete_password('test', 'user')
-        
+
         # Verify it's deleted from low priority backend
         assert low.get_password('test', 'user') is None
         # Verify chainer can't retrieve it anymore
@@ -122,7 +123,7 @@ class TestChainer:
         """
         high, low = delete_test_keyrings
         chainer = keyring.backends.chainer.ChainerBackend()
-        
+
         # Try to delete a password that doesn't exist anywhere
         with pytest.raises(PasswordDeleteError):
             chainer.delete_password('nonexistent', 'user')
