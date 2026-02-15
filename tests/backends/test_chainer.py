@@ -39,30 +39,28 @@ def delete_test_keyrings(monkeypatch):
 
     class HighPriorityKeyring(backend.KeyringBackend):
         priority = 2
-        storage = {}
 
         def get_password(self, system, user):
-            return self.storage.get((system, user))
+            return None
 
         def set_password(self, system, user, password):
-            self.storage[(system, user)] = password
+            pass
 
         def delete_password(self, system, user):
-            key = (system, user)
-            if key in self.storage:
-                del self.storage[key]
-            else:
-                raise PasswordDeleteError("Password not found")
+            raise PasswordDeleteError("Password not found")
 
     class LowPriorityKeyring(backend.KeyringBackend):
         priority = 1
-        storage = {('test', 'user'): 'old-password'}
+        storage: dict = {}
+
+        def __init__(self):
+            self.storage = {('test', 'user'): 'old-password'}
 
         def get_password(self, system, user):
             return self.storage.get((system, user))
 
         def set_password(self, system, user, password):
-            self.storage[(system, user)] = password
+            pass
 
         def delete_password(self, system, user):
             key = (system, user)
@@ -101,6 +99,10 @@ class TestChainer:
         """
         high, low = delete_test_keyrings
         chainer = keyring.backends.chainer.ChainerBackend()
+
+        # Verify set_password is defined (required by ABC) but is a no-op
+        high.set_password('test', 'user', 'ignored')
+        low.set_password('test', 'extra', 'ignored')
 
         # Verify the password exists in the low priority backend
         assert low.get_password('test', 'user') == 'old-password'
