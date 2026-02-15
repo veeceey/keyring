@@ -150,14 +150,9 @@ class TestWinVaultCaseInsensitive:
         cred_service = self._make_credential('user1', 'pass1')
         cred_compound = self._make_credential('user2', 'pass2')
 
-        def fake_read(target):
-            if target == 'service':
-                return cred_service
-            if target == 'user2@service':
-                return cred_compound
-            return None
+        responses = {"service": cred_service, "user2@service": cred_compound}
 
-        with mock.patch.object(kr, '_read_credential', side_effect=fake_read):
+        with mock.patch.object(kr, '_read_credential', side_effect=responses.get):
             result = kr._resolve_credential('service', 'user2')
         assert result is cred_compound
 
