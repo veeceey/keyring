@@ -51,7 +51,7 @@ def delete_test_keyrings(monkeypatch):
 
     class LowPriorityKeyring(backend.KeyringBackend):
         priority = 1
-        storage: dict = {}
+        storage = {}
 
         def __init__(self):
             self.storage = {('test', 'user'): 'old-password'}
